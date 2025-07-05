@@ -18,7 +18,6 @@
 (add-hook 'c-mode-hook #'my-c-mode-comment-italics)
 (add-hook 'c++-mode-hook #'my-c-mode-comment-italics)
 
-
 ;; Load ligature.el from local path
 (add-to-list 'load-path "~/.emacs.d/ligature")
 (require 'ligature)
@@ -31,6 +30,25 @@
 (global-ligature-mode t)
 
 
+(use-package hl-todo
+  :ensure t
+  :hook ((prog-mode . hl-todo-mode))
+  :config
+  (setq hl-todo-keyword-faces
+        '(("TODO"   . "#FFD700")
+          ("FIXME"  . "#FF4500")
+          ("HACK"   . "#FF69B4")
+          ("REVIEW" . "#00CED1")
+          ("NOTE"   . "#00FF00"))))
+
+(global-set-key (kbd "C-c t n") #'hl-todo-next)
+(global-set-key (kbd "C-c t p") #'hl-todo-previous)
+
+(show-paren-mode 1)
+(setq show-paren-style 'expression)
+
+
+;; --------------------------
 ;; Compilation Settings
 ;; --------------------------
 (defun my/find-makefile-dir (dir)
@@ -126,7 +144,7 @@ Returns the directory path if found, or nil if not."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-enabled-themes '(tsdh-dark))
- '(package-selected-packages '(markdown-mode vterm))
+ '(package-selected-packages '(hl-todo markdown-mode rainbow-delimiters vterm))
  '(safe-local-variable-values
    '((flycheck-gcc-include-path "../include")
      (flycheck-clang-include-path "../include"))))
