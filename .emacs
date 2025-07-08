@@ -1,6 +1,69 @@
 ;; -*- lexical-binding: t; -*-
 
 ;; --------------------------
+;; Package Setup
+;; --------------------------
+(require 'package)
+(setq package-enable-at-startup nil)
+
+(setq package-archives
+      '(("melpa" . "https://melpa.org/packages/")
+        ("gnu"   . "https://elpa.gnu.org/packages/")
+        ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
+
+;; Only refresh archives if missing
+(unless (file-exists-p (expand-file-name "archives/melpa/archive-contents" package-user-dir))
+  (package-refresh-contents))
+
+(package-initialize)
+
+;; --------------------------
+;; Bootstrap use-package
+;; --------------------------
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
+
+(eval-when-compile (require 'use-package))
+(setq use-package-always-ensure t)
+
+;; --------------------------
+;; Projectile Setup
+;; --------------------------
+(require 'projectile)
+(setq projectile-save-known-projects t)
+(setq projectile-remember-projects-under-project-root t)
+(projectile-mode +1)
+
+;; Manually load saved projects early
+(when (file-exists-p (expand-file-name "projectile-bookmarks.eld" user-emacs-directory))
+  (with-temp-buffer
+    (insert-file-contents (expand-file-name "projectile-bookmarks.eld" user-emacs-directory))
+    (setq projectile-known-projects (read (current-buffer)))))
+
+;; --------------------------
+;; Splash Screen Setup
+;; --------------------------
+(setq inhibit-startup-screen t)
+(setq inhibit-startup-message t)
+
+;; --------------------------
+;; Dashboard Setup
+;; --------------------------
+(require 'dashboard)
+(setq dashboard-startup-banner 'official)
+(setq dashboard-projects-backend 'projectile)
+(setq dashboard-items '((recents  . 5)
+                        (projects . 5)
+                        (bookmarks . 5)))
+(setq dashboard-center-content t)
+(setq dashboard-set-heading-icons t)
+(setq dashboard-set-file-icons t)
+(dashboard-setup-startup-hook)
+
+;; Refresh dashboard after full init
+(add-hook 'emacs-startup-hook #'dashboard-refresh-buffer)
+
+;; --------------------------
 ;; Font Settings
 ;; --------------------------
 ;;(set-face-attribute 'default nil :font "IBM Plex Mono Medium")
@@ -97,35 +160,6 @@ Returns the directory path if found, or nil if not."
 (add-hook 'c++-mode-hook #'my-c-mode-column-indicator)
 
 ;; --------------------------
-;; Package Setup
-;; --------------------------
-
-(require 'package)
-(setq package-enable-at-startup nil)
-
-(setq package-archives
-      '(("melpa" . "https://melpa.org/packages/")
-        ("gnu"   . "https://elpa.gnu.org/packages/")
-        ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
-
-;; Only refresh archives if missing
-(unless (file-exists-p (expand-file-name "archives/melpa/archive-contents" package-user-dir))
-  (package-refresh-contents))
-
-(package-initialize)
-
-;; --------------------------
-;; Bootstrap use-package
-;; --------------------------
-
-(unless (package-installed-p 'use-package)
-  (package-install 'use-package))
-
-(eval-when-compile (require 'use-package))
-
-(setq use-package-always-ensure t)
-
-;; --------------------------
 ;; Markdown Mode
 ;; --------------------------
 
@@ -144,7 +178,9 @@ Returns the directory path if found, or nil if not."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-enabled-themes '(tsdh-dark))
- '(package-selected-packages '(hl-todo markdown-mode rainbow-delimiters vterm))
+ '(package-selected-packages
+   '(dashboard hl-todo markdown-mode projectile projectile-git-autofetch
+	       rainbow-delimiters vterm))
  '(safe-local-variable-values
    '((flycheck-gcc-include-path "../include")
      (flycheck-clang-include-path "../include"))))
