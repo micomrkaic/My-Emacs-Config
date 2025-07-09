@@ -50,7 +50,8 @@
 ;; Dashboard Setup
 ;; --------------------------
 (require 'dashboard)
-(setq dashboard-startup-banner 'official)
+;;(setq dashboard-startup-banner 'official)
+(setq dashboard-startup-banner "~/.emacs.d/morpheus-small.png")
 (setq dashboard-projects-backend 'projectile)
 (setq dashboard-items '((recents  . 5)
                         (projects . 5)
@@ -110,6 +111,12 @@
 (show-paren-mode 1)
 (setq show-paren-style 'expression)
 
+;; --------------------------
+;; IDO Package Settings
+;; --------------------------
+(ido-mode 1)
+(setq ido-enable-flex-matching t) ;; allows partial matches
+(setq ido-everywhere t)
 
 ;; --------------------------
 ;; Compilation Settings
