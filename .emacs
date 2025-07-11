@@ -1,7 +1,15 @@
 ;; -*- lexical-binding: t; -*-
 
 ;; --------------------------
-;; Package Setup
+;; Custom File Location
+;; --------------------------
+(setq custom-file "~/.emacs.d/custom.el")
+(when (file-exists-p custom-file)
+  (load custom-file))
+
+
+;; --------------------------
+;; Package Repository Setup
 ;; --------------------------
 (require 'package)
 (setq package-enable-at-startup nil)
@@ -26,6 +34,16 @@
 (eval-when-compile (require 'use-package))
 (setq use-package-always-ensure t)
 
+
+;; --------------------------
+;; UNDO tree
+;; --------------------------
+(use-package undo-tree
+  :ensure t
+  :init
+  (global-undo-tree-mode))
+
+
 ;; --------------------------
 ;; Projectile Setup
 ;; --------------------------
@@ -39,6 +57,7 @@
   (with-temp-buffer
     (insert-file-contents (expand-file-name "projectile-bookmarks.eld" user-emacs-directory))
     (setq projectile-known-projects (read (current-buffer)))))
+
 
 ;; --------------------------
 ;; Splash Screen Setup
@@ -63,6 +82,7 @@
 
 ;; Refresh dashboard after full init
 (add-hook 'emacs-startup-hook #'dashboard-refresh-buffer)
+
 
 ;; --------------------------
 ;; Font Settings
@@ -94,6 +114,9 @@
 (global-ligature-mode t)
 
 
+;; --------------------------
+;; hl-todo Package Settings
+;; --------------------------
 (use-package hl-todo
   :ensure t
   :hook ((prog-mode . hl-todo-mode))
@@ -111,12 +134,14 @@
 (show-paren-mode 1)
 (setq show-paren-style 'expression)
 
+
 ;; --------------------------
 ;; IDO Package Settings
 ;; --------------------------
 (ido-mode 1)
 (setq ido-enable-flex-matching t) ;; allows partial matches
 (setq ido-everywhere t)
+
 
 ;; --------------------------
 ;; Compilation Settings
@@ -143,10 +168,11 @@ Returns the directory path if found, or nil if not."
 
 (global-set-key (kbd "C-x c") #'my/compile-project)
 
+
+
 ;; --------------------------
 ;; UI and Editor Settings
 ;; --------------------------
-
 (tool-bar-mode -1)
 
 (line-number-mode 1)
@@ -166,35 +192,13 @@ Returns the directory path if found, or nil if not."
 (add-hook 'c-mode-hook #'my-c-mode-column-indicator)
 (add-hook 'c++-mode-hook #'my-c-mode-column-indicator)
 
+
 ;; --------------------------
 ;; Markdown Mode
 ;; --------------------------
-
 (use-package markdown-mode
   :mode ("\\.md\\'" . markdown-mode)
   :init
   (setq markdown-command "pandoc"))
 
-;; --------------------------
-;; Custom
-;; --------------------------
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-enabled-themes '(tsdh-dark))
- '(package-selected-packages
-   '(dashboard hl-todo markdown-mode projectile projectile-git-autofetch
-	       rainbow-delimiters vterm))
- '(safe-local-variable-values
-   '((flycheck-gcc-include-path "../include")
-     (flycheck-clang-include-path "../include"))))
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
