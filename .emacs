@@ -90,19 +90,11 @@
 
 
 ;; --------------------------
-;; Font Settings
+;; Font and Ligature Settings
 ;; --------------------------
-;;(set-face-attribute 'default nil :font "IBM Plex Mono Medium")
-(set-face-attribute 'default nil :font "Victor Mono-12")
-
-;; (set-face-attribute 'default nil
-;;   :family "Fira Code"
-;;   :weight 'medium
-;;   :height 120)  ;; Adjust size (100 = 10pt)
-
-;; (set-face-attribute 'default nil
-;;   :family "JetBrains Mono"
-;;   :height 110)  adjust to your preferred size (100 = 10pt, 110 = 11pt, etc.)
+(set-face-attribute 'default nil
+  :family "Iosevka"
+  :height 120)  ;; adjust to your preferred size (100 = 10pt, 110 = 11pt, etc.)
 
 (defun my-c-mode-comment-italics ()
   (set-face-attribute 'font-lock-comment-face nil
@@ -110,6 +102,12 @@
 
 (add-hook 'c-mode-hook #'my-c-mode-comment-italics)
 (add-hook 'c++-mode-hook #'my-c-mode-comment-italics)
+
+(defun my-elisp-comment-italics ()
+  (set-face-attribute 'font-lock-comment-face nil
+    :slant 'italic))
+
+(add-hook 'emacs-lisp-mode-hook #'my-elisp-comment-italics)
 
 ;; Load ligature.el from local path
 (add-to-list 'load-path "~/.emacs.d/ligature")
@@ -127,27 +125,6 @@
   (ligature-set-ligatures mode
     '("www" "**" "***" "|||" "-->" "->" "<-" "=>" "!=" "==" "===" ">=" "<=" "&&" "||" "::" "++" "--"))
   (add-hook (intern (concat (symbol-name mode) "-hook")) #'ligature-mode))
-
-;; --------------------------
-;; Font Configuration by Mode
-;; --------------------------
-(defun my/set-prog-font ()
-  "Use Victor Mono for all programming modes."
-  (when (member "Victor Mono" (font-family-list))
-    (set-face-attribute 'default nil :family "Victor Mono" :height 120)))
-
-(defun my/set-writing-font ()
-  "Use EB Garamond for prose in Org and Markdown, and Victor Mono for fixed-pitch text."
-  (when (member "IBM Plex Mono Medium" (font-family-list))
-    (face-remap-add-relative 'default :family "IBM Plex Mono Medium" :height 120)
-    (face-remap-add-relative 'fixed-pitch :family "Victor Mono" :height 120)))
-
-(add-hook 'prog-mode-hook #'my/set-prog-font)
-(add-hook 'org-mode-hook #'my/set-writing-font)
-(add-hook 'markdown-mode-hook #'my/set-writing-font)
-
-;; Fallback to programming font on startup
-(my/set-prog-font)
 
 ;; --------------------------
 ;; hl-todo Package Settings
@@ -230,26 +207,6 @@ Returns the directory path if found, or nil if not."
 (tool-bar-mode -1)
 (line-number-mode 1)
 (column-number-mode 1)
-
-;;(setq display-line-numbers-type 'relative)
-;;(global-display-line-numbers-mode)
-
-
-;; Don't enable line numbers globally
-;; We'll handle it buffer-by-buffer
-(setq-default display-line-numbers nil)
-
-(defun my/enable-line-numbers-based-on-mode ()
-  "Enable relative line numbers in programming modes, absolute otherwise."
-  (setq display-line-numbers-type
-        (if (derived-mode-p 'prog-mode)
-            'relative
-          t))
-  (display-line-numbers-mode 1))
-
-;; Apply on all buffers
-(add-hook 'after-change-major-mode-hook #'my/enable-line-numbers-based-on-mode)
-
 (setq whitespace-display-mappings '((space-mark 32 [183] [46])))
 
 (require 'recentf)
@@ -262,6 +219,51 @@ Returns the directory path if found, or nil if not."
 (add-hook 'c-mode-hook #'my-c-mode-column-indicator)
 (add-hook 'c++-mode-hook #'my-c-mode-column-indicator)
 
+;; --------------------------
+;; Line Numbering
+;; --------------------------
+(setq display-line-numbers-type 'relative)
+(global-display-line-numbers-mode 1)
+
+;; Save font and line-number state
+(defvar-local my/olivetti-font-override nil)
+
+;; --------------------------
+;; Olivetti Mode Fine Tuning
+;; --------------------------
+(defun my/olivetti-mode-setup ()
+  "Adjust font and line numbers for Olivetti mode."
+  (if olivetti-mode
+      (progn
+        ;; Disable line numbers
+        (display-line-numbers-mode 0)
+        ;; Change font to Charis SIL
+        (setq my/olivetti-font-override
+              (face-remap-add-relative 'default :family "Charis SIL" :height 140)))
+    ;; When Olivetti mode is turned off
+    (display-line-numbers-mode 1)
+    (setq display-line-numbers-type 'relative)
+    ;; Restore font to the default font family
+    (when my/olivetti-font-override
+      (face-remap-remove-relative my/olivetti-font-override)
+      (setq my/olivetti-font-override nil))))
+
+;; Save per-buffer original menu bar state
+(defvar-local my/olivetti-menu-bar-was-enabled nil)
+
+(defun my/olivetti-toggle-menu-bar ()
+  (if olivetti-mode
+      (progn
+        ;; Save current state
+        (setq my/olivetti-menu-bar-was-enabled menu-bar-mode)
+        ;; Turn it off
+        (menu-bar-mode -1))
+    ;; Restore previous state
+    (when my/olivetti-menu-bar-was-enabled
+      (menu-bar-mode 1))))
+
+(add-hook 'olivetti-mode-hook #'my/olivetti-toggle-menu-bar)
+(add-hook 'olivetti-mode-hook #'my/olivetti-mode-setup)
 
 ;; --------------------------
 ;; Markdown Mode
