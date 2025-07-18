@@ -7,7 +7,6 @@
 (when (file-exists-p custom-file)
   (load custom-file))
 
-
 ;; --------------------------
 ;; Package Repository Setup
 ;; --------------------------
@@ -225,23 +224,33 @@ Returns the directory path if found, or nil if not."
 (setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode 1)
 
-;; Save font and line-number state
-(defvar-local my/olivetti-font-override nil)
-
 ;; --------------------------
 ;; Olivetti Mode Fine Tuning
 ;; --------------------------
+;; Save font and line-number state
+(defvar-local my/olivetti-font-override nil)
+
 (defun my/olivetti-mode-setup ()
   "Adjust font and line numbers for Olivetti mode."
   (if olivetti-mode
       (progn
         ;; Disable line numbers
         (display-line-numbers-mode 0)
+	;; Turn on wc-mode
+	(wc-mode 1)
+	;; Underline mispelled words
+	(flyspell-mode 1)
+	;; Break long lines nicely
+	(visual-line-mode 1)
         ;; Change font to Charis SIL
         (setq my/olivetti-font-override
               (face-remap-add-relative 'default :family "Charis SIL" :height 140)))
-    ;; When Olivetti mode is turned off
+    ;; When Olivetti mode is turned off undo the special settings
     (display-line-numbers-mode 1)
+    (wc-mode -1)
+    (flyspell-mode -1)
+    (visual-line-mode -11)
+
     (setq display-line-numbers-type 'relative)
     ;; Restore font to the default font family
     (when my/olivetti-font-override
