@@ -51,17 +51,19 @@
 ;; --------------------------
 ;; Projectile Setup
 ;; --------------------------
-(require 'projectile)
-(setq projectile-save-known-projects t)
-(setq projectile-remember-projects-under-project-root t)
-(projectile-mode +1)
-
-;; Manually load saved projects early
-(when (file-exists-p (expand-file-name "projectile-bookmarks.eld" user-emacs-directory))
-  (with-temp-buffer
-    (insert-file-contents (expand-file-name "projectile-bookmarks.eld" user-emacs-directory))
-    (setq projectile-known-projects (read (current-buffer)))))
-
+(use-package projectile
+  :ensure t
+  :init
+  (setq projectile-save-known-projects t
+        projectile-remember-projects-under-project-root t)
+  :config
+  (projectile-mode +1)
+  ;; Manually load saved projects early
+  (let ((bmk (expand-file-name "projectile-bookmarks.eld" user-emacs-directory)))
+    (when (file-exists-p bmk)
+      (with-temp-buffer
+        (insert-file-contents bmk)
+        (setq projectile-known-projects (read (current-buffer)))))))
 
 ;; --------------------------
 ;; Splash Screen Setup
@@ -72,21 +74,23 @@
 ;; --------------------------
 ;; Dashboard Setup
 ;; --------------------------
-(require 'dashboard)
-;;(setq dashboard-startup-banner 'official)
-(setq dashboard-startup-banner "~/.emacs.d/morpheus-small.png")
-(setq dashboard-projects-backend 'projectile)
-(setq dashboard-items '((recents  . 5)
-                        (projects . 5)
-                        (bookmarks . 5)))
-(setq dashboard-center-content t)
-(setq dashboard-set-heading-icons t)
-(setq dashboard-set-file-icons t)
-(dashboard-setup-startup-hook)
-
-;; Refresh dashboard after full init
-(add-hook 'emacs-startup-hook #'dashboard-refresh-buffer)
-
+(use-package dashboard
+  :ensure t
+  :after projectile
+  :init
+  (setq inhibit-startup-screen t
+        inhibit-startup-message t
+        dashboard-startup-banner "~/.emacs.d/morpheus-small.png"
+        dashboard-projects-backend 'projectile
+        dashboard-items '((recents  . 5)
+                          (projects . 5)
+                          (bookmarks . 5))
+        dashboard-center-content t
+        dashboard-set-heading-icons nil
+        dashboard-set-file-icons nil)
+  :config
+  (dashboard-setup-startup-hook)
+  (add-hook 'emacs-startup-hook #'dashboard-refresh-buffer))
 
 ;; --------------------------
 ;; Font and Ligature Settings
@@ -108,9 +112,12 @@
 
 (add-hook 'emacs-lisp-mode-hook #'my-elisp-comment-italics)
 
-;; Load ligature.el from local path
-(add-to-list 'load-path "~/.emacs.d/ligature")
-(require 'ligature)
+;; Load ligature.el 
+(use-package ligature
+  :ensure t
+  :commands (ligature-mode)
+  ;; :config  ;; put your ligature-set-ligatures here if you like
+)
 
 ;; Define ligatures for programming modes
 ;; (ligature-set-ligatures 'prog-mode
@@ -204,6 +211,8 @@ Returns the directory path if found, or nil if not."
 ;; UI and Editor Settings
 ;; --------------------------
 (tool-bar-mode -1)
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
 (line-number-mode 1)
 (column-number-mode 1)
 (setq whitespace-display-mappings '((space-mark 32 [183] [46])))
@@ -227,6 +236,9 @@ Returns the directory path if found, or nil if not."
 ;; --------------------------
 ;; Olivetti Mode Fine Tuning
 ;; --------------------------
+(use-package olivetti :ensure t :commands olivetti-mode)
+(use-package wc-mode  :ensure t :commands wc-mode)
+
 ;; Save font and line-number state
 (defvar-local my/olivetti-font-override nil)
 
