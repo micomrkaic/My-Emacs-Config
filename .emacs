@@ -33,7 +33,6 @@
 (eval-when-compile (require 'use-package))
 (setq use-package-always-ensure t)
 
-
 ;; --------------------------
 ;; UNDO tree
 ;; --------------------------
@@ -47,6 +46,26 @@
 ;; --------------------------
 (set-input-method "latin-2-prefix")
 
+;; --------------------------
+;; ORG Mode Setup
+;; --------------------------
+(use-package org-modern
+  :hook (org-mode . org-modern-mode)
+  :custom
+  ;; Vector of strings per level:
+  (org-modern-star ["●" "◉" "○" "✦" "•" "‣"])
+  ;; Hide the original stars:
+  (org-modern-hide-stars t)
+  ;; Nicer ellipsis when a heading is folded:
+  (org-modern-ellipsis " … ")
+)
+
+(use-package org-appear
+  :hook (org-mode . org-appear-mode))
+
+(setq org-hide-emphasis-markers t)  ;; hides *bold* /italic/ markers
+(setq org-pretty-entities t)        ;; renders symbols (like →, α, β, etc.)
+(setq org-startup-indented t)       ;; nice visual indentation
 
 ;; --------------------------
 ;; Projectile Setup
@@ -96,8 +115,8 @@
 ;; Font and Ligature Settings
 ;; --------------------------
 (set-face-attribute 'default nil
-  :family "Iosevka"
-  :height 120)  ;; adjust to your preferred size (100 = 10pt, 110 = 11pt, etc.)
+  :family "Victor Mono"
+  :height 110)  ;; adjust to your preferred size (100 = 10pt, 110 = 11pt, etc.)
 
 (defun my-c-mode-comment-italics ()
   (set-face-attribute 'font-lock-comment-face nil
@@ -294,3 +313,16 @@ Returns the directory path if found, or nil if not."
   :init
   (setq markdown-command "pandoc"))
 
+;; --------------------------
+;; Some Handy Functions
+;; --------------------------
+(defun my/insert-date ()
+  "Insert today's date as 'Month D, YYYY' (e.g., 'November 6, 2025')."
+  (interactive)
+  (let ((s (format-time-string "%B %e, %Y")))
+    ;; Collapse the space-padding from %e for single-digit days.
+    (insert (replace-regexp-in-string "  +" " " s))))
+
+;; Bind it
+(when (fboundp 'keymap-global-set)
+  (keymap-global-set "C-c d" #'my/insert-date))
